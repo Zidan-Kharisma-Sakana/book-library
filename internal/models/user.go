@@ -64,7 +64,7 @@ type TokenResponse struct {
 	RefreshToken string `json:"refresh_token"`
 	ExpiresIn    int    `json:"expires_in"`
 	TokenType    string `json:"token_type"`
-	UserID       uint   `json:"user_id"`
+	UserID       int    `json:"user_id"`
 	Username     string `json:"username"`
 	Role         string `json:"role"`
 }

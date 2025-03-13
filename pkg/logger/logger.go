@@ -8,19 +8,9 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-type Logger interface {
-	Debug(msg string, keysAndValues ...interface{})
-	Info(msg string, keysAndValues ...interface{})
-	Warn(msg string, keysAndValues ...interface{})
-	Error(msg string, keysAndValues ...interface{})
-	Fatal(msg string, keysAndValues ...interface{})
-}
+var sugaredLogger *zap.SugaredLogger
 
-type ZapLogger struct {
-	logger *zap.SugaredLogger
-}
-
-func New(level string) Logger {
+func Initialize(level string) {
 	var zapLevel zapcore.Level
 	switch strings.ToLower(level) {
 	case "debug":
@@ -57,29 +47,40 @@ func New(level string) Logger {
 		zapLevel,
 	)
 
-	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	sugaredLogger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1)).Sugar()
+}
 
-	return &ZapLogger{
-		logger: logger.Sugar(),
+func Debug(keysAndValues ...interface{}) {
+	if sugaredLogger == nil {
+		panic("logger not initialized")
 	}
+	sugaredLogger.Debug(keysAndValues...)
 }
 
-func (l *ZapLogger) Debug(msg string, keysAndValues ...interface{}) {
-	l.logger.Debugw(msg, keysAndValues...)
+func Info(msg string, keysAndValues ...interface{}) {
+	if sugaredLogger == nil {
+		panic("logger not initialized")
+	}
+	sugaredLogger.Infow(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Info(msg string, keysAndValues ...interface{}) {
-	l.logger.Infow(msg, keysAndValues...)
+func Warn(msg string, keysAndValues ...interface{}) {
+	if sugaredLogger == nil {
+		panic("logger not initialized")
+	}
+	sugaredLogger.Warnw(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Warn(msg string, keysAndValues ...interface{}) {
-	l.logger.Warnw(msg, keysAndValues...)
+func Error(msg string, keysAndValues ...interface{}) {
+	if sugaredLogger == nil {
+		panic("logger not initialized")
+	}
+	sugaredLogger.Errorw(msg, keysAndValues...)
 }
 
-func (l *ZapLogger) Error(msg string, keysAndValues ...interface{}) {
-	l.logger.Errorw(msg, keysAndValues...)
-}
-
-func (l *ZapLogger) Fatal(msg string, keysAndValues ...interface{}) {
-	l.logger.Fatalw(msg, keysAndValues...)
+func Fatal(msg string, keysAndValues ...interface{}) {
+	if sugaredLogger == nil {
+		panic("logger not initialized")
+	}
+	sugaredLogger.Fatalw(msg, keysAndValues...)
 }

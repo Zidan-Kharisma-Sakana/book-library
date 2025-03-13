@@ -98,7 +98,7 @@ func (s *BookService) Update(id int, input models.UpdateBookInput) (*models.Book
 	}
 	if input.AuthorID != nil {
 		// Check if author exists
-		author, err := s.authorRepo.GetByID(int(*input.AuthorID))
+		author, err := s.authorRepo.GetByID(*input.AuthorID)
 		if err != nil {
 			return nil, err
 		}
@@ -145,16 +145,4 @@ func (s *BookService) Delete(id int) error {
 
 func (s *BookService) List(filter models.BookFilter) ([]models.Book, int64, error) {
 	return s.bookRepo.List(filter)
-}
-
-func (s *BookService) GetBooksByAuthorID(authorID int) ([]models.Book, error) {
-	author, err := s.authorRepo.GetByID(authorID)
-	if err != nil {
-		return nil, err
-	}
-	if author == nil {
-		return nil, errors.New("author not found")
-	}
-
-	return s.bookRepo.GetBooksByAuthorID(authorID)
 }

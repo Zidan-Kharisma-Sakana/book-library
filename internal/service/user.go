@@ -6,23 +6,21 @@ import (
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/repository/interfaces"
 	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/config"
 	"github.com/go-playground/validator/v10"
-	"time"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 type UserService struct {
-	userRepo  interfaces.UserRepository
-	config    *config.Config
-	validator *validator.Validate
+	userRepo    interfaces.UserRepository
+	authService AuthService
+	config      *config.Config
+	validator   *validator.Validate
 }
 
-func NewUserService(validator *validator.Validate, userRepo interfaces.UserRepository) *UserService {
-	cfg, _ := config.Load()
+func NewUserService(cfg *config.Config, validator *validator.Validate, userRepo interfaces.UserRepository, authService AuthService) *UserService {
 	return &UserService{
-		userRepo:  userRepo,
-		config:    cfg,
-		validator: validator,
+		userRepo:    userRepo,
+		config:      cfg,
+		validator:   validator,
+		authService: authService,
 	}
 }
 
@@ -102,12 +100,12 @@ func (s *UserService) Login(input models.LoginInput) (*models.TokenResponse, err
 	}
 
 	// Generate JWT token
-	token, err := s.generateToken(user)
+	token, err := s.authService.generateToken(user)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := s.generateRefreshToken(user)
+	refreshToken, err := s.authService.generateRefreshToken(user)
 	if err != nil {
 		return nil, err
 	}
@@ -207,70 +205,4 @@ func (s *UserService) Delete(id int) error {
 
 func (s *UserService) List(page, pageSize int) ([]models.User, int64, error) {
 	return s.userRepo.List(page, pageSize)
-}
-
-func (s *UserService) ValidateToken(tokenString string) (int, string, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, errors.New("invalid token")
-		}
-		return []byte(s.config.JWTSecret), nil
-	})
-	if err != nil {
-		return 0, "", err
-	}
-
-	if !token.Valid {
-		return 0, "", errors.New("invalid token")
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return 0, "", errors.New("invalid token")
-	}
-
-	userID, ok := claims["user_id"].(float64)
-	if !ok {
-		return 0, "", errors.New("invalid token")
-	}
-
-	role, ok := claims["role"].(string)
-	if !ok {
-		return 0, "", errors.New("invalid token")
-	}
-
-	return int(userID), role, nil
-}
-
-func (s *UserService) generateToken(user *models.User) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": user.ID,
-		"role":    user.Role,
-		"exp":     time.Now().Add(s.config.TokenExpiry * time.Hour).Unix(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString([]byte(s.config.JWTSecret))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
-}
-
-func (s *UserService) generateRefreshToken(user *models.User) (string, error) {
-	claims := jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(s.config.TokenExpiry * 2).Unix(),
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString([]byte(s.config.JWTSecret))
-	if err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
 }

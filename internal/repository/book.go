@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/repository/interfaces"
+	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/errs"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +19,10 @@ func NewBookRepository(db *gorm.DB) *BookRepository {
 }
 
 func (r *BookRepository) Create(book *models.Book) error {
-	return r.db.Create(book).Error
+	if err := r.db.Create(book).Error; err != nil {
+		return errs.FromDatabase(err)
+	}
+	return nil
 }
 
 func (r *BookRepository) GetByID(id int) (*models.Book, error) {
@@ -28,7 +32,7 @@ func (r *BookRepository) GetByID(id int) (*models.Book, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, errs.FromDatabase(err)
 	}
 	return &book, nil
 }
@@ -40,17 +44,23 @@ func (r *BookRepository) GetByISBN(isbn string) (*models.Book, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, errs.FromDatabase(err)
 	}
 	return &book, nil
 }
 
 func (r *BookRepository) Update(book *models.Book) error {
-	return r.db.Save(book).Error
+	if err := r.db.Save(book).Error; err != nil {
+		return errs.FromDatabase(err)
+	}
+	return nil
 }
 
 func (r *BookRepository) Delete(id int) error {
-	return r.db.Delete(&models.Book{}, id).Error
+	if err := r.db.Where("id = ?", id).Delete(&models.Book{}).Error; err != nil {
+		return errs.FromDatabase(err)
+	}
+	return nil
 }
 
 func (r *BookRepository) List(filter models.BookFilter) ([]models.Book, int64, error) {
@@ -74,13 +84,13 @@ func (r *BookRepository) List(filter models.BookFilter) ([]models.Book, int64, e
 
 	err := query.Count(&count).Error
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errs.FromDatabase(err)
 	}
 
 	offset := (filter.Page - 1) * filter.PageSize
 	err = query.Offset(offset).Limit(filter.PageSize).Preload("Author").Find(&books).Error
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errs.FromDatabase(err)
 	}
 
 	return books, count, nil
@@ -89,5 +99,8 @@ func (r *BookRepository) List(filter models.BookFilter) ([]models.Book, int64, e
 func (r *BookRepository) GetBooksByAuthorID(authorID int) ([]models.Book, error) {
 	var books []models.Book
 	err := r.db.Where("author_id = ?", authorID).Find(&books).Error
-	return books, err
+	if err != nil {
+		return books, errs.FromDatabase(err)
+	}
+	return books, nil
 }

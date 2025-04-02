@@ -21,16 +21,16 @@ func (Author) TableName() string {
 
 type CreateAuthorInput struct {
 	Name        string    `json:"name" validate:"required"`
-	Biography   string    `json:"biography"`
+	Biography   string    `json:"biography" validate:"required"`
 	BirthDate   time.Time `json:"birth_date"`
-	Nationality string    `json:"nationality"`
+	Nationality string    `json:"nationality" validate:"required"`
 }
 
 type UpdateAuthorInput struct {
-	Name        *string    `json:"name"`
-	Biography   *string    `json:"biography"`
+	Name        *string    `json:"name" validate:"required"`
+	Biography   *string    `json:"biography" validate:"required"`
 	BirthDate   *time.Time `json:"birth_date"`
-	Nationality *string    `json:"nationality"`
+	Nationality *string    `json:"nationality" validate:"required"`
 }
 
 type AuthorFilter struct {

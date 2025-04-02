@@ -26,20 +26,20 @@ func (Book) TableName() string {
 type CreateBookInput struct {
 	Title       string    `json:"title" validate:"required"`
 	ISBN        string    `json:"isbn" validate:"required,isbn"`
-	Description string    `json:"description"`
+	Description string    `json:"description" validate:"required"`
 	AuthorID    int       `json:"author_id" validate:"required"`
-	Publisher   string    `json:"publisher"`
+	Publisher   string    `json:"publisher" validate:"required"`
 	PublishedAt time.Time `json:"published_at"`
 	Pages       int       `json:"pages" validate:"gte=0"`
 	Available   bool      `json:"available"`
 }
 
 type UpdateBookInput struct {
-	Title       *string    `json:"title"`
-	ISBN        *string    `json:"isbn" validate:"omitempty,isbn"`
-	Description *string    `json:"description"`
-	AuthorID    *int       `json:"author_id"`
-	Publisher   *string    `json:"publisher"`
+	Title       *string    `json:"title" validate:"required"`
+	ISBN        *string    `json:"isbn" validate:"required,isbn"`
+	Description *string    `json:"description" validate:"required"`
+	AuthorID    *int       `json:"author_id" validate:"required"`
+	Publisher   *string    `json:"publisher" validate:"required"`
 	PublishedAt *time.Time `json:"published_at"`
 	Pages       *int       `json:"pages" validate:"omitempty,gte=0"`
 	Available   *bool      `json:"available"`

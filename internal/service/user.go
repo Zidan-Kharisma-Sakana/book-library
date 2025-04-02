@@ -5,6 +5,7 @@ import (
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/repository/interfaces"
 	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/config"
+	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/errs"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -25,21 +26,8 @@ func NewUserService(cfg *config.Config, validator *validator.Validate, userRepo 
 }
 
 func (s *UserService) Register(input models.CreateUserInput) (*models.User, error) {
-	existingUser, err := s.userRepo.GetByUsername(input.Username)
-	if err != nil {
-		return nil, err
-	}
-	if existingUser != nil {
-		return nil, errors.New("username already exists")
-	}
-
-	// Check if email already exists
-	existingUser, err = s.userRepo.GetByEmail(input.Email)
-	if err != nil {
-		return nil, err
-	}
-	if existingUser != nil {
-		return nil, errors.New("email already exists")
+	if err := s.validator.Struct(input); err != nil {
+		return nil, errs.NewBadRequestError().SetError(err)
 	}
 
 	user := &models.User{
@@ -59,10 +47,6 @@ func (s *UserService) Register(input models.CreateUserInput) (*models.User, erro
 		user.Role = "user"
 	}
 
-	if err := s.validator.Struct(user); err != nil {
-		return nil, err
-	}
-
 	if err := s.userRepo.Create(user); err != nil {
 		return nil, err
 	}
@@ -71,6 +55,10 @@ func (s *UserService) Register(input models.CreateUserInput) (*models.User, erro
 }
 
 func (s *UserService) Login(input models.LoginInput) (*models.TokenResponse, error) {
+	if err := s.validator.Struct(input); err != nil {
+		return nil, errs.NewBadRequestError().SetError(err)
+	}
+
 	var user *models.User
 	var err error
 
@@ -79,27 +67,50 @@ func (s *UserService) Login(input models.LoginInput) (*models.TokenResponse, err
 	} else if input.Email != "" {
 		user, err = s.userRepo.GetByEmail(input.Email)
 	} else {
-		return nil, errors.New("username or email is required")
+		return nil, errs.NewBadRequestError().SetMessage("username or email is required")
 	}
 
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("invalid credentials")
+		return nil, errs.NewBadRequestError().SetMessage("invalid credentials")
 	}
 
-	// Check if user is active
 	if !user.Active {
-		return nil, errors.New("user is inactive")
+		return nil, errs.NewBadRequestError().SetMessage("user is inactive")
 	}
 
-	// Check password
 	if !user.CheckPassword(input.Password) {
-		return nil, errors.New("invalid credentials")
+		return nil, errs.NewBadRequestError().SetMessage("invalid credentials")
 	}
 
-	// Generate JWT token
+	token, err := s.authService.generateToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshToken, err := s.authService.generateRefreshToken(user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.TokenResponse{
+		Token:        token,
+		RefreshToken: refreshToken,
+		ExpiresIn:    int(s.config.TokenExpiry.Seconds()),
+		TokenType:    "Bearer",
+		UserID:       int(user.ID),
+		Username:     user.Username,
+		Role:         user.Role,
+	}, nil
+}
+
+func (s *UserService) RefreshToken(userId int) (*models.TokenResponse, error) {
+	user, err := s.userRepo.GetByID(userId)
+	if err != nil {
+		return nil, err
+	}
 	token, err := s.authService.generateToken(user)
 	if err != nil {
 		return nil, err
@@ -132,14 +143,17 @@ func (s *UserService) GetByID(id int) (*models.User, error) {
 	return user, nil
 }
 
-func (s *UserService) Update(id int, input models.UpdateUserInput) (*models.User, error) {
+func (s *UserService) Update(id int, role string, input models.UpdateUserInput) (*models.User, error) {
 	// Get existing user
+	if err := s.validator.Struct(input); err != nil {
+		return nil, errs.NewBadRequestError().SetError(err)
+	}
 	user, err := s.userRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		return nil, errors.New("user not found")
+		return nil, errs.NewNotFoundError()
 	}
 
 	if input.Username != nil {
@@ -153,13 +167,6 @@ func (s *UserService) Update(id int, input models.UpdateUserInput) (*models.User
 		user.Username = *input.Username
 	}
 	if input.Email != nil {
-		existingUser, err := s.userRepo.GetByEmail(*input.Email)
-		if err != nil {
-			return nil, err
-		}
-		if existingUser != nil && int(existingUser.ID) != id {
-			return nil, errors.New("email already exists")
-		}
 		user.Email = *input.Email
 	}
 	if input.Password != nil {
@@ -173,15 +180,11 @@ func (s *UserService) Update(id int, input models.UpdateUserInput) (*models.User
 	if input.LastName != nil {
 		user.LastName = *input.LastName
 	}
-	if input.Role != nil {
+	if input.Role != nil && role == "admin" {
 		user.Role = *input.Role
 	}
-	if input.Active != nil {
+	if input.Active != nil && role == "admin" {
 		user.Active = *input.Active
-	}
-
-	if err := s.validator.Struct(user); err != nil {
-		return nil, err
 	}
 
 	if err := s.userRepo.Update(user); err != nil {

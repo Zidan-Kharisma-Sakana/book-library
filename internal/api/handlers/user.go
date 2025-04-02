@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"errors"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/service"
-	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/logger"
+	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/errs"
 	"net/http"
 	"strconv"
 
@@ -47,7 +46,6 @@ func (h *UserHandler) GetUser(_ http.ResponseWriter, r *http.Request) (interface
 
 	user, err := h.userService.GetByID(int(id))
 	if err != nil {
-		logger.Error("Failed to get user", "error", err)
 		return nil, err
 	}
 
@@ -68,9 +66,13 @@ func (h *UserHandler) UpdateUser(_ http.ResponseWriter, r *http.Request) (interf
 		return nil, err
 	}
 
-	user, err := h.userService.Update(int(id), input)
+	role, ok := r.Context().Value("role").(string)
+	if !ok {
+		return nil, errs.NewUnauthorized()
+	}
+
+	user, err := h.userService.Update(int(id), role, input)
 	if err != nil {
-		logger.Error("Failed to update user", "error", err)
 		return nil, err
 	}
 
@@ -87,7 +89,6 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) (interf
 	}
 
 	if err := h.userService.Delete(int(id)); err != nil {
-		logger.Error("Failed to delete user", "error", err)
 		return nil, err
 	}
 
@@ -117,7 +118,6 @@ func (h *UserHandler) ListUsers(_ http.ResponseWriter, r *http.Request) (interfa
 
 	users, count, err := h.userService.List(page, pageSize)
 	if err != nil {
-		logger.Error("Failed to list users", "error", err)
 		return nil, err
 	}
 
@@ -144,12 +144,11 @@ func (h *UserHandler) ListUsers(_ http.ResponseWriter, r *http.Request) (interfa
 func (h *UserHandler) GetProfile(_ http.ResponseWriter, r *http.Request) (interface{}, error) {
 	userID, ok := r.Context().Value("userID").(uint)
 	if !ok {
-		return nil, errors.New(http.StatusText(http.StatusUnauthorized))
+		return nil, errs.NewUnauthorized()
 	}
 
 	user, err := h.userService.GetByID(int(userID))
 	if err != nil {
-		logger.Error("Failed to get profile", "error", err)
 		return nil, err
 	}
 
@@ -159,9 +158,12 @@ func (h *UserHandler) GetProfile(_ http.ResponseWriter, r *http.Request) (interf
 func (h *UserHandler) UpdateProfile(_ http.ResponseWriter, r *http.Request) (interface{}, error) {
 	userID, ok := r.Context().Value("userID").(uint)
 	if !ok {
-		return nil, errors.New(http.StatusText(http.StatusUnauthorized))
+		return nil, errs.NewUnauthorized()
 	}
-
+	role, ok := r.Context().Value("role").(string)
+	if !ok {
+		return nil, errs.NewUnauthorized()
+	}
 	input, err := decodeBody[models.UpdateUserInput](r)
 	if err != nil {
 		return nil, err
@@ -169,9 +171,8 @@ func (h *UserHandler) UpdateProfile(_ http.ResponseWriter, r *http.Request) (int
 
 	input.Role = nil
 
-	user, err := h.userService.Update(int(userID), input)
+	user, err := h.userService.Update(int(userID), role, input)
 	if err != nil {
-		logger.Error("Failed to update profile", "error", err)
 		return nil, err
 	}
 

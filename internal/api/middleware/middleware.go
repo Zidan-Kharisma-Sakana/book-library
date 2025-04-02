@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/service"
 	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/logger"
+	"golang.org/x/time/rate"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -19,7 +21,6 @@ func Logger() func(next http.Handler) http.Handler {
 
 			next.ServeHTTP(rw, r)
 
-			// Log request
 			logger.Info("Request",
 				"method", r.Method,
 				"path", r.URL.Path,
@@ -37,7 +38,6 @@ func Recoverer() func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if err := recover(); err != nil {
-					// Log error
 					logger.Error("Panic recovered",
 						"error", err,
 						"stack", string(debug.Stack()),
@@ -55,7 +55,7 @@ func Recoverer() func(next http.Handler) http.Handler {
 	}
 }
 
-func Auth(authService *service.AuthService) func(next http.Handler) http.Handler {
+func Authentication(authService *service.AuthService) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeader := r.Header.Get("Authorization")
@@ -76,56 +76,34 @@ func Auth(authService *service.AuthService) func(next http.Handler) http.Handler
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "userID", userID)
+			ctx := context.WithValue(r.Context(), "userID", uint(userID))
 			ctx = context.WithValue(ctx, "role", role)
+			fmt.Println(userID, role)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-func AdminOnly() func(next http.Handler) http.Handler {
+func FilterRole(allowedRoles ...string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			role, ok := r.Context().Value("role").(string)
-			if !ok || role != "admin" {
+			if !ok {
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
 
-			next.ServeHTTP(w, r)
-		})
-	}
-}
+			isAllowed := false
+			for _, allowedRole := range allowedRoles {
+				isAllowed = isAllowed || role == allowedRole
+			}
 
-func LibrarianOnly() func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			role, ok := r.Context().Value("role").(string)
-			if !ok || (role != "admin" && role != "librarian") {
+			if !isAllowed {
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
 
-			next.ServeHTTP(w, r)
-		})
-	}
-}
-
-func CORS() func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Access-Control-Allow-Origin", "*")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-			// Handle preflight requests
-			if r.Method == "OPTIONS" {
-				w.WriteHeader(http.StatusOK)
-				return
-			}
-
-			// Proceed with next handler
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -134,26 +112,20 @@ func CORS() func(next http.Handler) http.Handler {
 func Timeout(timeout time.Duration) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Create a context with timeout
 			ctx, cancel := context.WithTimeout(r.Context(), timeout)
 			defer cancel()
 
-			// Create a channel to signal when the request is done
 			done := make(chan struct{})
 
-			// Execute the request in a goroutine
 			go func() {
 				next.ServeHTTP(w, r.WithContext(ctx))
 				close(done)
 			}()
 
-			// Wait for request to complete or timeout
 			select {
 			case <-done:
-				// Request completed normally
 				return
 			case <-ctx.Done():
-				// Request timed out
 				http.Error(w, "Request timeout", http.StatusGatewayTimeout)
 				return
 			}
@@ -161,18 +133,29 @@ func Timeout(timeout time.Duration) func(next http.Handler) http.Handler {
 	}
 }
 
-// Custom response writer to capture status code
+func RateLimiter(limiter *rate.Limiter) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if !limiter.Allow() {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusTooManyRequests)
+				w.Write([]byte(`{"error":"Rate limit exceeded"}`))
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int
 }
 
-// NewResponseWriter creates a new responseWriter
 func newResponseWriter(w http.ResponseWriter) *responseWriter {
 	return &responseWriter{w, http.StatusOK}
 }
 
-// WriteHeader captures status code
 func (rw *responseWriter) WriteHeader(code int) {
 	rw.statusCode = code
 	rw.ResponseWriter.WriteHeader(code)

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"errors"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/repository/interfaces"
+	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/errs"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -20,15 +20,15 @@ func NewAuthorService(validator *validator.Validate, authorRepo interfaces.Autho
 }
 
 func (s *AuthorService) Create(input models.CreateAuthorInput) (*models.Author, error) {
+	if err := s.validator.Struct(input); err != nil {
+		return nil, err
+	}
+
 	author := &models.Author{
 		Name:        input.Name,
 		Biography:   input.Biography,
 		BirthDate:   input.BirthDate,
 		Nationality: input.Nationality,
-	}
-
-	if err := s.validator.Struct(author); err != nil {
-		return nil, err
 	}
 
 	if err := s.authorRepo.Create(author); err != nil {
@@ -43,9 +43,6 @@ func (s *AuthorService) GetByID(id int) (*models.Author, error) {
 	if err != nil {
 		return nil, err
 	}
-	if author == nil {
-		return nil, errors.New("author not found")
-	}
 	return author, nil
 }
 
@@ -54,37 +51,26 @@ func (s *AuthorService) GetWithBooks(id int) (*models.Author, error) {
 	if err != nil {
 		return nil, err
 	}
-	if author == nil {
-		return nil, errors.New("author not found")
-	}
 	return author, nil
 }
 
 func (s *AuthorService) Update(id int, input models.UpdateAuthorInput) (*models.Author, error) {
+	if err := s.validator.Struct(input); err != nil {
+		return nil, err
+	}
+
 	author, err := s.authorRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 	if author == nil {
-		return nil, errors.New("author not found")
+		return nil, errs.NewNotFoundError()
 	}
 
-	if input.Name != nil {
-		author.Name = *input.Name
-	}
-	if input.Biography != nil {
-		author.Biography = *input.Biography
-	}
-	if input.BirthDate != nil {
-		author.BirthDate = *input.BirthDate
-	}
-	if input.Nationality != nil {
-		author.Nationality = *input.Nationality
-	}
-
-	if err := s.validator.Struct(author); err != nil {
-		return nil, err
-	}
+	author.Name = *input.Name
+	author.Biography = *input.Biography
+	author.BirthDate = *input.BirthDate
+	author.Nationality = *input.Nationality
 
 	if err := s.authorRepo.Update(author); err != nil {
 		return nil, err
@@ -99,7 +85,7 @@ func (s *AuthorService) Delete(id int) error {
 		return err
 	}
 	if author == nil {
-		return errors.New("author not found")
+		return errs.NewNotFoundError()
 	}
 
 	return s.authorRepo.Delete(id)

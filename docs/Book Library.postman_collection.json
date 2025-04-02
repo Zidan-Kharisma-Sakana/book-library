@@ -1,0 +1,1035 @@
+{
+	"info": {
+		"_postman_id": "72e55401-4d2c-42ac-942e-c44dd070edf0",
+		"name": "Book Library",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14707620"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "register user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"User Login Successful\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    const responseData = pm.response.json();",
+									"    pm.expect(responseData).to.have.property(\"token\");",
+									"    pm.expect(responseData).to.have.property(\"refreshToken\");",
+									"    // Store tokens",
+									"    pm.environment.set(\"token\", responseData.token);",
+									"    pm.environment.set(\"refreshToken\", responseData.refreshToken);",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser3\",\n  \"email\": \"testuser3@example.com\",\n  \"password\": \"password123\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\",\n  \"role\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/auth/register",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "New Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\": \"testuser2\",\n  \"email\": \"testuser2@example.com\",\n  \"password\": \"password123\",\n  \"first_name\": \"Test\",\n  \"last_name\": \"User\",\n  \"role\": \"user\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/auth/register",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"register"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 05:25:58 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "242"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": 7,\n    \"CreatedAt\": \"2025-04-02T12:25:58.317294+07:00\",\n    \"UpdatedAt\": \"2025-04-02T12:25:58.317294+07:00\",\n    \"DeletedAt\": null,\n    \"username\": \"testuser2\",\n    \"email\": \"testuser2@example.com\",\n    \"first_name\": \"Test\",\n    \"last_name\": \"User\",\n    \"role\": \"user\",\n    \"active\": true\n}"
+						}
+					]
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"librarian22\",\n    \"password\": \"librarian22\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/auth/login",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "login",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"admin1\",\n    \"password\": \"admin1\"\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/auth/login",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 05:28:44 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "379"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjg4MTcyMTI2NTgsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOjF9.VxbmVuLaRE_am6vXHWcUuhlZBY21BvARnGImZ2xPF9E\",\n    \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1NzE4NDQsInVzZXJfaWQiOjF9.N_V5AvqZHWwQyVhvbWwrVjOdlNa4VA59zzeqrNxlIvw\",\n    \"expires_in\": 60,\n    \"token_type\": \"Bearer\",\n    \"user_id\": 1,\n    \"username\": \"admin1\",\n    \"role\": \"admin\"\n}"
+						}
+					]
+				},
+				{
+					"name": "refresh token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1NzQ2NTIsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOjF9.BUmf5nTXnr0D1M6OuJDno8PzYvKPlaKGtYOIDq6iIbE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/auth/refresh",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "refresh",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1NzQ2NTIsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOjF9.BUmf5nTXnr0D1M6OuJDno8PzYvKPlaKGtYOIDq6iIbE\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/auth/refresh",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"auth",
+										"refresh"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 06:15:46 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "399"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjg4MTcyMTU0ODEsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOjF9.McFKL-Qq5W4xF3B6xhOS9iFR1VnhQzD-p5bFkaZbaHI\",\n    \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1NzQ2NjYsInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOjF9.MVvSXZecziNsPIfxNO08JDoBCrue5zMuTzqo-cIyNaQ\",\n    \"expires_in\": 60,\n    \"token_type\": \"Bearer\",\n    \"user_id\": 1,\n    \"username\": \"admin1\",\n    \"role\": \"admin\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "Get Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/profile",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "profile admin",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/profile",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 06:38:36 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "238"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": 1,\n    \"CreatedAt\": \"2025-04-02T11:13:37.509374+07:00\",\n    \"UpdatedAt\": \"2025-04-02T11:13:37.509374+07:00\",\n    \"DeletedAt\": null,\n    \"username\": \"admin1\",\n    \"email\": \"admin1@example.com\",\n    \"first_name\": \"Admin\",\n    \"last_name\": \"User\",\n    \"role\": \"admin\",\n    \"active\": true\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin1\",\n    \"email\": \"newemail@example.com\",\n    \"first_name\": \"New\",\n    \"last_name\": \"Name\",\n    \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/profile",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"profile"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "update profile",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"newusername\",\n    \"email\": \"newemail@example.com\",\n    \"first_name\": \"New\",\n    \"last_name\": \"Name\",\n    \"active\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/profile",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"profile"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 06:53:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "243"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": 1,\n    \"CreatedAt\": \"2025-04-02T11:13:37.509374+07:00\",\n    \"UpdatedAt\": \"2025-04-02T13:53:57.331953+07:00\",\n    \"DeletedAt\": null,\n    \"username\": \"newusername\",\n    \"email\": \"newemail@example.com\",\n    \"first_name\": \"New\",\n    \"last_name\": \"Name\",\n    \"role\": \"admin\",\n    \"active\": true\n}"
+						}
+					]
+				},
+				{
+					"name": "list users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/users",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "users",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/users",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:07:59 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1527"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"users\": [\n        {\n            \"ID\": 3,\n            \"CreatedAt\": \"2025-04-02T11:13:37.514651+07:00\",\n            \"UpdatedAt\": \"2025-04-02T11:13:37.514651+07:00\",\n            \"DeletedAt\": null,\n            \"username\": \"user1\",\n            \"email\": \"user1@example.com\",\n            \"first_name\": \"Regular\",\n            \"last_name\": \"User\",\n            \"role\": \"user\",\n            \"active\": true\n        },\n        {\n            \"ID\": 4,\n            \"CreatedAt\": \"2025-04-02T11:41:18.578999+07:00\",\n            \"UpdatedAt\": \"2025-04-02T11:41:18.578999+07:00\",\n            \"DeletedAt\": null,\n            \"username\": \"testuser1\",\n            \"email\": \"testuser1@example.com\",\n            \"first_name\": \"Test\",\n            \"last_name\": \"User\",\n            \"role\": \"user\",\n            \"active\": true\n        },\n        {\n            \"ID\": 7,\n            \"CreatedAt\": \"2025-04-02T12:25:58.317294+07:00\",\n            \"UpdatedAt\": \"2025-04-02T12:25:58.317294+07:00\",\n            \"DeletedAt\": null,\n            \"username\": \"testuser2\",\n            \"email\": \"testuser2@example.com\",\n            \"first_name\": \"Test\",\n            \"last_name\": \"User\",\n            \"role\": \"user\",\n            \"active\": true\n        },\n        {\n            \"ID\": 8,\n            \"CreatedAt\": \"2025-04-02T12:26:42.737927+07:00\",\n            \"UpdatedAt\": \"2025-04-02T12:26:42.737927+07:00\",\n            \"DeletedAt\": null,\n            \"username\": \"testuser3\",\n            \"email\": \"testuser3@example.com\",\n            \"first_name\": \"Test\",\n            \"last_name\": \"User\",\n            \"role\": \"admin\",\n            \"active\": true\n        },\n        {\n            \"ID\": 1,\n            \"CreatedAt\": \"2025-04-02T11:13:37.509374+07:00\",\n            \"UpdatedAt\": \"2025-04-02T13:54:54.797582+07:00\",\n            \"DeletedAt\": null,\n            \"username\": \"admin1\",\n            \"email\": \"newemail@example.com\",\n            \"first_name\": \"New\",\n            \"last_name\": \"Name\",\n            \"role\": \"admin\",\n            \"active\": true\n        },\n        {\n            \"ID\": 2,\n            \"CreatedAt\": \"2025-04-02T11:13:37.512671+07:00\",\n            \"UpdatedAt\": \"2025-04-02T14:06:53.078016+07:00\",\n            \"DeletedAt\": null,\n            \"username\": \"librarian22\",\n            \"email\": \"updatedemail@example.com\",\n            \"first_name\": \"Librarian\",\n            \"last_name\": \"User\",\n            \"role\": \"librarian\",\n            \"active\": true\n        }\n    ],\n    \"total_count\": 6,\n    \"page\": 1,\n    \"page_size\": 10,\n    \"total_pages\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "Get User By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/users/1",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get by admin/librarian",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/users/3",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"3"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:03:05 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "237"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": 3,\n    \"CreatedAt\": \"2025-04-02T11:13:37.514651+07:00\",\n    \"UpdatedAt\": \"2025-04-02T11:13:37.514651+07:00\",\n    \"DeletedAt\": null,\n    \"username\": \"user1\",\n    \"email\": \"user1@example.com\",\n    \"first_name\": \"Regular\",\n    \"last_name\": \"User\",\n    \"role\": \"user\",\n    \"active\": true\n}"
+						},
+						{
+							"name": "Get by user",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/users/1",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"1"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "text/plain; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "X-Content-Type-Options",
+									"value": "nosniff"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:04:18 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "10"
+								}
+							],
+							"cookie": [],
+							"body": "Forbidden\n"
+						}
+					]
+				},
+				{
+					"name": "Update user by id",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"librarian22\",\n    \"password\": \"librarian22\",\n    \"email\": \"updatedemail@example.com\",\n    \"role\": \"librarian\",\n    \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/users/2",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "update by admin",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username\": \"librarian22\",\n    \"password\": \"librarian22\",\n    \"email\": \"updatedemail@example.com\",\n    \"role\": \"librarian\",\n    \"active\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/users/2",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"users",
+										"2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:06:53 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "257"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": 2,\n    \"CreatedAt\": \"2025-04-02T11:13:37.512671+07:00\",\n    \"UpdatedAt\": \"2025-04-02T14:06:53.078016+07:00\",\n    \"DeletedAt\": null,\n    \"username\": \"librarian22\",\n    \"email\": \"updatedemail@example.com\",\n    \"first_name\": \"Librarian\",\n    \"last_name\": \"User\",\n    \"role\": \"librarian\",\n    \"active\": true\n}"
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDM1NzgxNzksInJvbGUiOiJhZG1pbiIsInVzZXJfaWQiOjF9.WB-6IEJDXyjREWknRmPXCCn2kQw2XBYebuDCwBLiEkY",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "author",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Jane Austena\",\n    \"biography\": \"British novelist\",\n    \"birth_date\": \"1775-12-16T00:00:00Z\",\n    \"nationality\": \"British\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/authors",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"authors"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "create",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Jane Austen\",\n    \"biography\": \"British novelist\",\n    \"birth_date\": \"1775-12-16T00:00:00Z\",\n    \"nationality\": \"British\"\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/authors",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"authors"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "plain",
+							"header": [
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:20:15 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "232"
+								},
+								{
+									"key": "Content-Type",
+									"value": "text/plain; charset=utf-8"
+								}
+							],
+							"cookie": [],
+							"body": "{\"ID\":3,\"CreatedAt\":\"2025-04-02T14:20:15.800432+07:00\",\"UpdatedAt\":\"2025-04-02T14:20:15.800432+07:00\",\"DeletedAt\":null,\"name\":\"Jane Austen\",\"biography\":\"British novelist\",\"birth_date\":\"1775-12-16T00:00:00Z\",\"nationality\":\"British\"}\n"
+						}
+					]
+				},
+				{
+					"name": "list authors",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/authors",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"authors"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "list (public)",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/authors",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"authors"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:21:16 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1032"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"authors\": [\n        {\n            \"ID\": 1,\n            \"CreatedAt\": \"2025-04-02T11:13:37.516748+07:00\",\n            \"UpdatedAt\": \"2025-04-02T11:13:37.516748+07:00\",\n            \"DeletedAt\": null,\n            \"name\": \"Jane Austen\",\n            \"biography\": \"British novelist\",\n            \"birth_date\": \"1775-12-16T07:07:12+07:07\",\n            \"nationality\": \"British\"\n        },\n        {\n            \"ID\": 2,\n            \"CreatedAt\": \"2025-04-02T11:13:37.51857+07:00\",\n            \"UpdatedAt\": \"2025-04-02T11:13:37.51857+07:00\",\n            \"DeletedAt\": null,\n            \"name\": \"George Orwell\",\n            \"biography\": \"English novelist and essayist\",\n            \"birth_date\": \"1903-06-25T07:07:12+07:07\",\n            \"nationality\": \"English\"\n        },\n        {\n            \"ID\": 3,\n            \"CreatedAt\": \"2025-04-02T14:20:15.800432+07:00\",\n            \"UpdatedAt\": \"2025-04-02T14:20:15.800432+07:00\",\n            \"DeletedAt\": null,\n            \"name\": \"Jane Austen\",\n            \"biography\": \"British novelist\",\n            \"birth_date\": \"1775-12-16T07:07:12+07:07\",\n            \"nationality\": \"British\"\n        },\n        {\n            \"ID\": 4,\n            \"CreatedAt\": \"2025-04-02T14:20:39.767786+07:00\",\n            \"UpdatedAt\": \"2025-04-02T14:20:39.767786+07:00\",\n            \"DeletedAt\": null,\n            \"name\": \"Jane Austena\",\n            \"biography\": \"British novelist\",\n            \"birth_date\": \"1775-12-16T07:07:12+07:07\",\n            \"nationality\": \"British\"\n        }\n    ],\n    \"total_count\": 4,\n    \"page\": 1,\n    \"page_size\": 10,\n    \"total_pages\": 1\n}"
+						}
+					]
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Jane Austen\",\n    \"biography\": \"Updated British novelist\",\n    \"birth_date\": \"1775-12-16T00:00:00Z\",\n    \"nationality\": \"Updated British\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/authors/3",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"authors",
+								"3"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "updated",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Updated Jane Austen\",\n    \"biography\": \"Updated British novelist\",\n    \"birth_date\": \"1775-12-16T00:00:00Z\",\n    \"nationality\": \"Updated British\"\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/authors/3",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"authors",
+										"3"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:22:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "256"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": 3,\n    \"CreatedAt\": \"2025-04-02T14:20:15.800432+07:00\",\n    \"UpdatedAt\": \"2025-04-02T14:22:57.359846+07:00\",\n    \"DeletedAt\": null,\n    \"name\": \"Updated Jane Austen\",\n    \"biography\": \"Updated British novelist\",\n    \"birth_date\": \"1775-12-16T00:00:00Z\",\n    \"nationality\": \"Updated British\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Author",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{book_library_url}}/api/v1/authors/1/with-books",
+							"host": [
+								"{{book_library_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"authors",
+								"1",
+								"with-books"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "get with books",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{book_library_url}}/api/v1/authors/1/with-books",
+									"host": [
+										"{{book_library_url}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"authors",
+										"1",
+										"with-books"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 02 Apr 2025 07:23:46 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "754"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"ID\": 1,\n    \"CreatedAt\": \"2025-04-02T11:13:37.516748+07:00\",\n    \"UpdatedAt\": \"2025-04-02T11:13:37.516748+07:00\",\n    \"DeletedAt\": null,\n    \"name\": \"Jane Austen\",\n    \"biography\": \"British novelist\",\n    \"birth_date\": \"1775-12-16T07:07:12+07:07\",\n    \"nationality\": \"British\",\n    \"books\": [\n        {\n            \"ID\": 1,\n            \"CreatedAt\": \"2025-04-02T11:13:37.520026+07:00\",\n            \"UpdatedAt\": \"2025-04-02T11:13:37.520026+07:00\",\n            \"DeletedAt\": null,\n            \"title\": \"Pride and Prejudice\",\n            \"isbn\": \"978-0141439518\",\n            \"description\": \"A novel by Jane Austen\",\n            \"author_id\": 1,\n            \"author\": {\n                \"ID\": 0,\n                \"CreatedAt\": \"0001-01-01T00:00:00Z\",\n                \"UpdatedAt\": \"0001-01-01T00:00:00Z\",\n                \"DeletedAt\": null,\n                \"name\": \"\",\n                \"biography\": \"\",\n                \"birth_date\": \"0001-01-01T00:00:00Z\",\n                \"nationality\": \"\"\n            },\n            \"publisher\": \"T. Egerton\",\n            \"published_at\": \"1813-01-28T07:07:12+07:07\",\n            \"pages\": 279,\n            \"available\": true\n        }\n    ]\n}"
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{librarian_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}

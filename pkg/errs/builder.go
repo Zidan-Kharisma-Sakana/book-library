@@ -2,7 +2,6 @@ package errs
 
 import (
 	"errors"
-	"fmt"
 	"github.com/go-playground/validator/v10"
 	"net/http"
 )
@@ -10,7 +9,7 @@ import (
 type ErrorResponse struct {
 	RequestId string       `json:"request_id,omitempty"`
 	Message   string       `json:"message"`
-	Errors    []FieldError `json:"errors"`
+	Errors    []FieldError `json:"errors,omitempty"`
 }
 
 type FieldError struct {
@@ -20,19 +19,19 @@ type FieldError struct {
 }
 
 type ErrorBuilder struct {
-	StatusCode int
-	Message    string
-	Errors     []FieldError
-	Err        error
-	MetaData   interface{}
-	RequestId  string
+	StatusCode    int
+	Message       string
+	Errors        []FieldError
+	OriginalError error
+	MetaData      interface{}
+	RequestId     string
 }
 
 func (builder *ErrorBuilder) Error() string {
-	if builder.Err != nil {
-		return builder.Err.Error()
+	if builder.OriginalError != nil {
+		return builder.OriginalError.Error()
 	}
-	return fmt.Sprintf("[%v] %s", builder.StatusCode, builder.Message)
+	return builder.Message
 }
 
 func (builder *ErrorBuilder) SetStatusCode(statusCode int) *ErrorBuilder {
@@ -55,7 +54,7 @@ func (builder *ErrorBuilder) SetMetaData(meta interface{}) *ErrorBuilder {
 	return builder
 }
 func (builder *ErrorBuilder) SetError(err error) *ErrorBuilder {
-	builder.Err = err
+	builder.OriginalError = err
 	return builder
 }
 
@@ -74,31 +73,38 @@ func (builder *ErrorBuilder) Build() *ErrorResponse {
 
 func NewInternalServerError(err error) *ErrorBuilder {
 	return &ErrorBuilder{
-		StatusCode: http.StatusInternalServerError,
-		Message:    http.StatusText(http.StatusInternalServerError),
-		Errors:     nil,
-		Err:        err,
-		MetaData:   nil,
+		StatusCode:    http.StatusInternalServerError,
+		Message:       http.StatusText(http.StatusInternalServerError),
+		Errors:        nil,
+		OriginalError: err,
+		MetaData:      nil,
+	}
+}
+
+func NewUnauthorized() *ErrorBuilder {
+	return &ErrorBuilder{
+		StatusCode: http.StatusUnauthorized,
+		Message:    http.StatusText(http.StatusUnauthorized),
 	}
 }
 
 func NewBadRequestError() *ErrorBuilder {
 	return &ErrorBuilder{
-		StatusCode: http.StatusBadRequest,
-		Message:    http.StatusText(http.StatusBadRequest),
-		Errors:     nil,
-		Err:        nil,
-		MetaData:   nil,
+		StatusCode:    http.StatusBadRequest,
+		Message:       http.StatusText(http.StatusBadRequest),
+		Errors:        nil,
+		OriginalError: nil,
+		MetaData:      nil,
 	}
 }
 
 func NewNotFoundError() *ErrorBuilder {
 	return &ErrorBuilder{
-		StatusCode: http.StatusNotFound,
-		Message:    http.StatusText(http.StatusNotFound),
-		Errors:     nil,
-		Err:        nil,
-		MetaData:   nil,
+		StatusCode:    http.StatusNotFound,
+		Message:       http.StatusText(http.StatusNotFound),
+		Errors:        nil,
+		OriginalError: nil,
+		MetaData:      nil,
 	}
 }
 
@@ -115,10 +121,19 @@ func NewValidationError(err error) *ErrorBuilder {
 		}
 	}
 	return &ErrorBuilder{
-		StatusCode: http.StatusBadRequest,
-		Message:    http.StatusText(http.StatusBadRequest),
-		Errors:     fieldErrors,
-		Err:        err,
-		MetaData:   nil,
+		StatusCode:    http.StatusBadRequest,
+		Message:       http.StatusText(http.StatusBadRequest),
+		Errors:        fieldErrors,
+		OriginalError: err,
+		MetaData:      nil,
+	}
+}
+
+func FromDatabase(err error) *ErrorBuilder {
+	return &ErrorBuilder{
+		StatusCode:    http.StatusBadRequest,
+		Message:       http.StatusText(http.StatusBadRequest),
+		OriginalError: err,
+		MetaData:      nil,
 	}
 }

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"errors"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/repository/interfaces"
+	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/errs"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -22,20 +22,8 @@ func NewBookService(validator *validator.Validate, bookRepo interfaces.BookRepos
 }
 
 func (s *BookService) Create(input models.CreateBookInput) (*models.Book, error) {
-	author, err := s.authorRepo.GetByID(input.AuthorID)
-	if err != nil {
-		return nil, err
-	}
-	if author == nil {
-		return nil, errors.New("author not found")
-	}
-
-	existingBook, err := s.bookRepo.GetByISBN(input.ISBN)
-	if err != nil {
-		return nil, err
-	}
-	if existingBook != nil {
-		return nil, errors.New("book with this ISBN already exists")
+	if err := s.validator.Struct(input); err != nil {
+		return nil, errs.NewBadRequestError().SetError(err)
 	}
 
 	book := &models.Book{
@@ -47,10 +35,6 @@ func (s *BookService) Create(input models.CreateBookInput) (*models.Book, error)
 		PublishedAt: input.PublishedAt,
 		Pages:       input.Pages,
 		Available:   input.Available,
-	}
-
-	if err := s.validator.Struct(book); err != nil {
-		return nil, err
 	}
 
 	if err := s.bookRepo.Create(book); err != nil {
@@ -65,64 +49,30 @@ func (s *BookService) GetByID(id int) (*models.Book, error) {
 	if err != nil {
 		return nil, err
 	}
-	if book == nil {
-		return nil, errors.New("book not found")
-	}
 	return book, nil
 }
 
 func (s *BookService) Update(id int, input models.UpdateBookInput) (*models.Book, error) {
+	if err := s.validator.Struct(input); err != nil {
+		return nil, errs.NewBadRequestError().SetError(err)
+	}
+
 	book, err := s.bookRepo.GetByID(id)
 	if err != nil {
 		return nil, err
 	}
 	if book == nil {
-		return nil, errors.New("book not found")
+		return nil, errs.NewNotFoundError()
 	}
 
-	if input.Title != nil {
-		book.Title = *input.Title
-	}
-	if input.ISBN != nil {
-		existingBook, err := s.bookRepo.GetByISBN(*input.ISBN)
-		if err != nil {
-			return nil, err
-		}
-		if existingBook != nil && int(existingBook.ID) != id {
-			return nil, errors.New("book with this ISBN already exists")
-		}
-		book.ISBN = *input.ISBN
-	}
-	if input.Description != nil {
-		book.Description = *input.Description
-	}
-	if input.AuthorID != nil {
-		// Check if author exists
-		author, err := s.authorRepo.GetByID(*input.AuthorID)
-		if err != nil {
-			return nil, err
-		}
-		if author == nil {
-			return nil, errors.New("author not found")
-		}
-		book.AuthorID = *input.AuthorID
-	}
-	if input.Publisher != nil {
-		book.Publisher = *input.Publisher
-	}
-	if input.PublishedAt != nil {
-		book.PublishedAt = *input.PublishedAt
-	}
-	if input.Pages != nil {
-		book.Pages = *input.Pages
-	}
-	if input.Available != nil {
-		book.Available = *input.Available
-	}
-
-	if err := s.validator.Struct(book); err != nil {
-		return nil, err
-	}
+	book.AuthorID = *input.AuthorID
+	book.ISBN = *input.ISBN
+	book.Title = *input.Title
+	book.Description = *input.Description
+	book.Publisher = *input.Publisher
+	book.PublishedAt = *input.PublishedAt
+	book.Pages = *input.Pages
+	book.Available = *input.Available
 
 	if err := s.bookRepo.Update(book); err != nil {
 		return nil, err
@@ -137,7 +87,7 @@ func (s *BookService) Delete(id int) error {
 		return err
 	}
 	if book == nil {
-		return errors.New("book not found")
+		return errs.NewNotFoundError()
 	}
 
 	return s.bookRepo.Delete(id)

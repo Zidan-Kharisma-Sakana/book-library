@@ -52,7 +52,7 @@ func main() {
 	userService := service.NewUserService(cfg, validate, userRepo, *authService)
 
 	srv := api.NewServer(
-		cfg.ServerAddress,
+		cfg,
 		authService,
 		bookService,
 		authorService,

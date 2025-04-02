@@ -38,19 +38,19 @@ type CreateUserInput struct {
 	Username  string `json:"username" validate:"required"`
 	Email     string `json:"email" validate:"required,email"`
 	Password  string `json:"password" validate:"required,min=8"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Role      string `json:"role" validate:"omitempty,oneof=user admin librarian"`
+	FirstName string `json:"first_name" validate:"required"`
+	LastName  string `json:"last_name" validate:"required"`
+	Role      string `json:"role" validate:"required,oneof=user admin librarian"`
 }
 
 type UpdateUserInput struct {
-	Username  *string `json:"username"`
+	Username  *string `json:"username" validate:""`
 	Email     *string `json:"email" validate:"omitempty,email"`
 	Password  *string `json:"password" validate:"omitempty,min=8"`
-	FirstName *string `json:"first_name"`
-	LastName  *string `json:"last_name"`
+	FirstName *string `json:"first_name" validate:""`
+	LastName  *string `json:"last_name" validate:""`
 	Role      *string `json:"role" validate:"omitempty,oneof=user admin librarian"`
-	Active    *bool   `json:"active"`
+	Active    *bool   `json:"active" validate:""`
 }
 
 type LoginInput struct {

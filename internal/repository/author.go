@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/repository/interfaces"
-
+	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/errs"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +19,10 @@ func NewAuthorRepository(db *gorm.DB) *AuthorRepository {
 }
 
 func (r *AuthorRepository) Create(author *models.Author) error {
-	return r.db.Create(author).Error
+	if err := r.db.Create(author).Error; err != nil {
+		return errs.FromDatabase(err)
+	}
+	return nil
 }
 
 func (r *AuthorRepository) GetByID(id int) (*models.Author, error) {
@@ -27,19 +30,25 @@ func (r *AuthorRepository) GetByID(id int) (*models.Author, error) {
 	err := r.db.First(&author, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, nil // Return nil, nil if not found
+			return nil, nil
 		}
-		return nil, err
+		return nil, errs.FromDatabase(err)
 	}
 	return &author, nil
 }
 
 func (r *AuthorRepository) Update(author *models.Author) error {
-	return r.db.Save(author).Error
+	if err := r.db.Save(author).Error; err != nil {
+		return errs.FromDatabase(err)
+	}
+	return nil
 }
 
 func (r *AuthorRepository) Delete(id int) error {
-	return r.db.Delete(&models.Author{}, id).Error
+	if err := r.db.Delete(&models.Author{}, id).Error; err != nil {
+		return errs.FromDatabase(err)
+	}
+	return nil
 }
 
 func (r *AuthorRepository) List(filter models.AuthorFilter) ([]models.Author, int64, error) {
@@ -57,13 +66,13 @@ func (r *AuthorRepository) List(filter models.AuthorFilter) ([]models.Author, in
 
 	err := query.Count(&count).Error
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errs.FromDatabase(err)
 	}
 
 	offset := (filter.Page - 1) * filter.PageSize
 	err = query.Offset(offset).Limit(filter.PageSize).Find(&authors).Error
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, errs.FromDatabase(err)
 	}
 
 	return authors, count, nil
@@ -76,7 +85,7 @@ func (r *AuthorRepository) GetWithBooks(id int) (*models.Author, error) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, errs.FromDatabase(err)
 	}
 	return &author, nil
 }

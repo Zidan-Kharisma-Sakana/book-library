@@ -3,7 +3,6 @@ package handlers
 import (
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/service"
-	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/logger"
 	"net/http"
 	"strconv"
 
@@ -39,7 +38,6 @@ func (h *BookHandler) CreateBook(w http.ResponseWriter, r *http.Request) (interf
 
 	book, err := h.bookService.Create(input)
 	if err != nil {
-		logger.Error("Failed to create book", "error", err)
 		return nil, err
 	}
 
@@ -58,7 +56,6 @@ func (h *BookHandler) GetBook(_ http.ResponseWriter, r *http.Request) (interface
 
 	book, err := h.bookService.GetByID(int(id))
 	if err != nil {
-		logger.Error("Failed to get book", "error", err)
 		return nil, err
 	}
 
@@ -81,7 +78,6 @@ func (h *BookHandler) UpdateBook(_ http.ResponseWriter, r *http.Request) (interf
 
 	book, err := h.bookService.Update(int(id), input)
 	if err != nil {
-		logger.Error("Failed to update book", "error", err)
 		return nil, err
 	}
 
@@ -98,7 +94,6 @@ func (h *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request) (interf
 	}
 
 	if err := h.bookService.Delete(int(id)); err != nil {
-		logger.Error("Failed to delete book", "error", err)
 		return nil, err
 	}
 
@@ -144,7 +139,6 @@ func (h *BookHandler) ListBooks(_ http.ResponseWriter, r *http.Request) (interfa
 
 	books, count, err := h.bookService.List(filter)
 	if err != nil {
-		logger.Error("Failed to list books", "error", err)
 		return nil, err
 	}
 

@@ -5,7 +5,6 @@ import (
 
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/service"
-	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -21,13 +20,10 @@ func NewAuthHandler(userService *service.UserService, authService *service.AuthS
 	}
 }
 
-func (h *AuthHandler) RegisterUserRoutes(r *mux.Router) {
-	r.HandleFunc("/auth/refresh", routeWrapper(h.RefreshToken)).Methods("POST")
-}
-
 func (h *AuthHandler) RegisterPublicRoutes(r *mux.Router) {
 	r.HandleFunc("/auth/register", routeWrapper(h.Register)).Methods("POST")
 	r.HandleFunc("/auth/login", routeWrapper(h.Login)).Methods("POST")
+	r.HandleFunc("/auth/refresh", routeWrapper(h.RefreshToken)).Methods("POST")
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) (interface{}, error) {
@@ -38,7 +34,6 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) (interfac
 
 	user, err := h.userService.Register(input)
 	if err != nil {
-		logger.Error("Failed to register user", "error", err)
 		return nil, err
 	}
 
@@ -54,7 +49,6 @@ func (h *AuthHandler) Login(_ http.ResponseWriter, r *http.Request) (interface{}
 
 	token, err := h.userService.Login(input)
 	if err != nil {
-		logger.Error("Failed to login user", "error", err)
 		return nil, err
 	}
 
@@ -71,26 +65,12 @@ func (h *AuthHandler) RefreshToken(_ http.ResponseWriter, r *http.Request) (inte
 
 	userID, _, err := h.authService.ValidateToken(input.RefreshToken)
 	if err != nil {
-		logger.Error("Failed to validate refresh token", "error", err)
 		return nil, err
 	}
 
-	user, err := h.userService.GetByID(userID)
+	token, err := h.userService.RefreshToken(userID)
 	if err != nil {
-		logger.Error("Failed to get user", "error", err)
 		return nil, err
 	}
-
-	loginInput := models.LoginInput{
-		Username: user.Username,
-		Password: "",
-	}
-
-	token, err := h.userService.Login(loginInput)
-	if err != nil {
-		logger.Error("Failed to refresh token", "error", err)
-		return nil, err
-	}
-
 	return token, nil
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/models"
 	"github.com/Zidan-Kharisma-Sakana/book-library/internal/service"
-	"github.com/Zidan-Kharisma-Sakana/book-library/pkg/logger"
 	"github.com/gorilla/mux"
 )
 
@@ -40,7 +39,6 @@ func (h *AuthorHandler) CreateAuthor(w http.ResponseWriter, r *http.Request) (in
 
 	author, err := h.authorService.Create(input)
 	if err != nil {
-		logger.Error("Failed to create author", "error", err)
 		return nil, err
 	}
 
@@ -59,7 +57,6 @@ func (h *AuthorHandler) GetAuthor(_ http.ResponseWriter, r *http.Request) (inter
 
 	author, err := h.authorService.GetByID(int(id))
 	if err != nil {
-		logger.Error("Failed to get author", "error", err)
 		return nil, err
 	}
 
@@ -77,7 +74,6 @@ func (h *AuthorHandler) GetAuthorWithBooks(_ http.ResponseWriter, r *http.Reques
 
 	author, err := h.authorService.GetWithBooks(int(id))
 	if err != nil {
-		logger.Error("Failed to get author with books", "error", err)
 		return nil, err
 	}
 
@@ -100,7 +96,6 @@ func (h *AuthorHandler) UpdateAuthor(_ http.ResponseWriter, r *http.Request) (in
 
 	author, err := h.authorService.Update(int(id), input)
 	if err != nil {
-		logger.Error("Failed to update author", "error", err)
 		return nil, err
 	}
 
@@ -117,7 +112,6 @@ func (h *AuthorHandler) DeleteAuthor(w http.ResponseWriter, r *http.Request) (in
 	}
 
 	if err := h.authorService.Delete(int(id)); err != nil {
-		logger.Error("Failed to delete author", "error", err)
 		return nil, err
 	}
 
@@ -151,7 +145,6 @@ func (h *AuthorHandler) ListAuthors(_ http.ResponseWriter, r *http.Request) (int
 
 	authors, count, err := h.authorService.List(filter)
 	if err != nil {
-		logger.Error("Failed to list authors", "error", err)
 		return nil, err
 	}
 

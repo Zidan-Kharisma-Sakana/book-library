@@ -55,7 +55,7 @@ func (s *AuthService) generateToken(user *models.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
 		"role":    user.Role,
-		"exp":     time.Now().Add(s.config.TokenExpiry * time.Hour).Unix(),
+		"exp":     time.Now().Add(s.config.TokenExpiry).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -71,6 +71,7 @@ func (s *AuthService) generateToken(user *models.User) (string, error) {
 func (s *AuthService) generateRefreshToken(user *models.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": user.ID,
+		"role":    user.Role,
 		"exp":     time.Now().Add(s.config.TokenExpiry * 2).Unix(),
 	}
 
